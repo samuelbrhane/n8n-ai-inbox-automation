@@ -1,0 +1,11 @@
+# Private notes
+PROGRESS.md
+
+# Environment
+.env
+!.env.example
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
