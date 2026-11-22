@@ -1,0 +1,240 @@
+{
+  "name": "5. Evaluate sorting",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "840e731f-e771-4682-8dd1-c84b4f67a0b6",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1vexV2Wl91asThVsyek-df2ve9p90aaAMvZ_VZ4XvQXo",
+          "mode": "list",
+          "cachedResultName": "Northvale Inbox",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vexV2Wl91asThVsyek-df2ve9p90aaAMvZ_VZ4XvQXo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 224136658,
+          "mode": "list",
+          "cachedResultName": "Test emails",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vexV2Wl91asThVsyek-df2ve9p90aaAMvZ_VZ4XvQXo/edit#gid=224136658"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "4599e3e8-7291-422c-8b49-02b530da54cb",
+      "name": "Read test emails",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "B8nAPYHPbHNeuN1w",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5.4-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        496,
+        208
+      ],
+      "id": "de93c25a-11d6-4c6a-ac24-a0d1dc4353a9",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "gCmihEbVmsdeKwAG",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"category\": {\n      \"type\": \"string\",\n      \"enum\": [\"question\", \"repair\", \"complaint\", \"viewing\", \"spam\"]\n    },\n    \"urgency\": {\n      \"type\": \"string\",\n      \"enum\": [\"emergency\", \"normal\"]\n    },\n    \"summary\": {\n      \"type\": \"string\",\n      \"description\": \"One short English sentence for the office team\"\n    },\n    \"tenant_name\": {\n      \"type\": \"string\"\n    },\n    \"flat_code\": {\n      \"type\": \"string\",\n      \"description\": \"Flat code like VR12-3B, empty if not stated\"\n    },\n    \"language\": {\n      \"type\": \"string\",\n      \"description\": \"Two-letter code of the email's language, like en or it\"\n    }\n  },\n  \"required\": [\"category\", \"urgency\", \"summary\", \"tenant_name\", \"flat_code\", \"language\"]\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        736,
+        208
+      ],
+      "id": "2b4e742b-7305-46ca-b2d1-417359153e1a",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5.4-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        416
+      ],
+      "id": "92ba48fd-e27d-41dd-a153-c30d8633236e",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "gCmihEbVmsdeKwAG",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject: {{ $json.subject }}\n\n{{ $json.body }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You sort emails sent to Northvale Rentals, a company that manages rental flats.  Choose exactly one category: - question: a tenant asks for information (rent, payments, rules, parking, pets, contracts, moving) - repair: something in the flat or building is broken or not working - complaint: unhappy about a neighbour, noise, the service or a person - viewing: someone wants to see a flat or apply to rent one - spam: advertising, sales offers, newsletters or anything unrelated to renting  Urgency is \"emergency\" only for: water leaking or a burst pipe, no heating, a gas smell, no electricity in the whole flat, or a flat that cannot be locked. Everything else is \"normal\".  Write the summary in English, in one short sentence for the office team. Take the flat code (like VR12-3B) only if the email states it; otherwise leave it empty. Take the sender's name from the signature at the end of the email. Use the From line only if there is no signature."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        608,
+        0
+      ],
+      "id": "bb790d9d-472a-4bc3-9299-348d534a931f",
+      "name": "Sort test email"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compares the AI's answers with the expected labels\nconst tests = $('Read test emails').all().map(item => item.json);\n\nconst results = $input.all().map((item, i) => {\n  const test = tests[i];\n  const out = item.json.output;\n  return {\n    id: test.id,\n    subject: test.subject,\n    expected: `${test.expected_category} / ${test.expected_urgency}`,\n    predicted: `${out.category} / ${out.urgency}`,\n    category_ok: out.category === test.expected_category,\n    urgency_ok: out.urgency === test.expected_urgency,\n  };\n});\n\nconst total = results.length;\nconst share = n => `${n}/${total} (${Math.round((n / total) * 100)}%)`;\nconst categoryOk = results.filter(r => r.category_ok).length;\nconst urgencyOk = results.filter(r => r.urgency_ok).length;\nconst emergencies = tests.filter(t => t.expected_urgency === 'emergency').length;\nconst caught = results.filter(\n  (r, i) => tests[i].expected_urgency === 'emergency' && r.urgency_ok\n).length;\n\nreturn [{\n  json: {\n    category_accuracy: share(categoryOk),\n    urgency_accuracy: share(urgencyOk),\n    emergencies_caught: `${caught}/${emergencies}`,\n    mistakes: results.filter(r => !r.category_ok || !r.urgency_ok),\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "cacd2cb3-70f5-49e6-b2cb-eb4aad0766c4",
+      "name": "Score results"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read test emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sort test email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Sort test email",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read test emails": {
+      "main": [
+        [
+          {
+            "node": "Sort test email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort test email": {
+      "main": [
+        [
+          {
+            "node": "Score results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4e0f6d39-f8db-4b90-9ed1-3d4478b2bd70",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7759bc24a933c48933729d474cfeea2ac28fd4927a3fbca08adbded221bcf2f8"
+  },
+  "nodeGroups": [],
+  "id": "mYy4wQAdEVVicsXH",
+  "tags": []
+}
