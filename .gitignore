@@ -9,3 +9,6 @@ PROGRESS.md
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Upwork video, kept locally and not pushed
+media/
