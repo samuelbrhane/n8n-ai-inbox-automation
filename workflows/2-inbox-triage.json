@@ -863,6 +863,66 @@
           "name": "Gmail account"
         }
       }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CL1J9ERCZ",
+          "mode": "list",
+          "cachedResultName": "inbox-approvals"
+        },
+        "text": "=:white_check_mark: Reply sent to {{ $('Sort email').item.json.output.tenant_name }}: \"{{ $('Gmail Trigger').item.json.subject }}\"",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2176,
+        -976
+      ],
+      "id": "652a5e19-f4dd-46a9-b0a8-ac19d00df345",
+      "name": "Confirm sent",
+      "webhookId": "88e431ab-4da2-4d66-b6f9-8e70092bc02a",
+      "credentials": {
+        "slackApi": {
+          "id": "Je5ZeR6C817EF67V",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CL1J9ERCZ",
+          "mode": "list",
+          "cachedResultName": "inbox-approvals"
+        },
+        "text": "=:no_entry_sign: Not sent, please reply by hand to {{ $('Sort email').item.json.output.tenant_name }}: \"{{ $('Gmail Trigger').item.json.subject }}\"",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1968,
+        -768
+      ],
+      "id": "eafb2cf3-7ee1-4ba1-9531-26cf24e13031",
+      "name": "Confirm not sent",
+      "webhookId": "5aa35f1d-8d2d-4c5c-9734-0290370a7c85",
+      "credentials": {
+        "slackApi": {
+          "id": "Je5ZeR6C817EF67V",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -1056,7 +1116,7 @@
         ],
         [
           {
-            "node": "Log to sheet",
+            "node": "Confirm not sent",
             "type": "main",
             "index": 0
           }
@@ -1111,7 +1171,7 @@
       "main": [
         [
           {
-            "node": "Log to sheet",
+            "node": "Confirm sent",
             "type": "main",
             "index": 0
           }
@@ -1161,9 +1221,31 @@
           }
         ]
       ]
+    },
+    "Confirm sent": {
+      "main": [
+        [
+          {
+            "node": "Log to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm not sent": {
+      "main": [
+        [
+          {
+            "node": "Log to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -1172,7 +1254,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "versionId": "c7c4ccb1-7c38-422a-b136-fe195e41189e",
+  "versionId": "6f77e261-74b7-4a0e-b80d-0d73f0f21208",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "7759bc24a933c48933729d474cfeea2ac28fd4927a3fbca08adbded221bcf2f8"
