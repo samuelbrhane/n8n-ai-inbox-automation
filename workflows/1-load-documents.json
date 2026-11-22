@@ -1,0 +1,237 @@
+{
+  "name": "1. Load documents",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8343fd19-66e7-4cd6-89ad-004dd8f4993b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DROP TABLE IF EXISTS northvale_docs;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.8,
+      "position": [
+        224,
+        0
+      ],
+      "id": "fffaa0a7-bd58-4bc1-ad54-eef565edd3b9",
+      "name": "Clear old vectors",
+      "credentials": {
+        "postgres": {
+          "id": "0A45ICKswlhHWN0Q",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "/data/docs/*.md",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        432,
+        0
+      ],
+      "id": "10825877-3a95-485f-ad0d-03a2ccdae0f9",
+      "name": "Read files"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Turns each file into { source, text } so every chunk keeps its file name\nconst items = $input.all();\nconst docs = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const buffer = await this.helpers.getBinaryDataBuffer(i, 'data');\n  docs.push({\n    json: {\n      source: items[i].binary.data.fileName,\n      text: buffer.toString('utf8'),\n    },\n  });\n}\n\nreturn docs;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "efafd5ef-4057-418b-b0f4-18d3a7099e51",
+      "name": "Prepare documents"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": "northvale_docs",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.4,
+      "position": [
+        816,
+        0
+      ],
+      "id": "b4d0c1e2-a649-4742-8373-db603f5446e6",
+      "name": "Postgres PGVector Store",
+      "credentials": {
+        "postgres": {
+          "id": "0A45ICKswlhHWN0Q",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        736,
+        176
+      ],
+      "id": "30e98570-5a93-42d0-8c60-19a62cefc957",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "gCmihEbVmsdeKwAG",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "=expressionData",
+        "jsonData": "={{ $json.text }}",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "source",
+                "value": "={{ $json.source }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        176
+      ],
+      "id": "0a2fbe61-f399-4788-9e03-b101ec9d141d",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 800,
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        384
+      ],
+      "id": "01e7f73e-108a-4052-a957-f8d1d9f11f44",
+      "name": "Recursive Character Text Splitter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Clear old vectors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear old vectors": {
+      "main": [
+        [
+          {
+            "node": "Read files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read files": {
+      "main": [
+        [
+          {
+            "node": "Prepare documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare documents": {
+      "main": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "66fdbe79-959a-4fb9-aa20-d0481476ed70",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7759bc24a933c48933729d474cfeea2ac28fd4927a3fbca08adbded221bcf2f8"
+  },
+  "nodeGroups": [],
+  "id": "Ce6AtUPbwANuHbHe",
+  "tags": []
+}
