@@ -1,0 +1,150 @@
+{
+  "name": "3. Daily summary",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 18
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0f7013b9-138a-4509-ab45-633e9ea9499e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1vexV2Wl91asThVsyek-df2ve9p90aaAMvZ_VZ4XvQXo",
+          "mode": "list",
+          "cachedResultName": "Northvale Inbox",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vexV2Wl91asThVsyek-df2ve9p90aaAMvZ_VZ4XvQXo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Inbox log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vexV2Wl91asThVsyek-df2ve9p90aaAMvZ_VZ4XvQXo/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "94262364-8d75-4802-8f43-91f2e28e1d2b",
+      "name": "Read inbox log",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "B8nAPYHPbHNeuN1w",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Builds today's report from the Inbox log rows\nconst today = $now.toFormat('yyyy-MM-dd');\nconst rows = $input.all()\n  .map(item => item.json)\n  .filter(row => String(row.handled_at || '').startsWith(today));\n\nconst count = (column, value) => rows.filter(row => row[column] === value).length;\nconst list = items => items.length\n  ? items.map(row => `• ${row.subject} (${row.from})`).join('\\n')\n  : '• none';\n\nconst types = ['question', 'repair', 'complaint', 'viewing', 'spam']\n  .map(type => `• ${type}: ${count('category', type)}`)\n  .join('\\n');\n\nconst emergencies = rows.filter(row => row.urgency === 'emergency');\nconst waiting = rows.filter(row => row.status === 'escalated' || row.status === 'rejected');\n\nconst text = [\n  `:bar_chart: *Daily summary, ${today}*`,\n  `*${rows.length} emails handled*`,\n  types,\n  '',\n  `*Replies sent after approval:* ${count('status', 'sent')}`,\n  `*Automatic replies:* ${count('status', 'auto_replied')}`,\n  '',\n  `:rotating_light: *Emergencies:* ${emergencies.length}`,\n  list(emergencies),\n  '',\n  `:raising_hand: *Waiting for a person:* ${waiting.length}`,\n  list(waiting),\n].join('\\n');\n\nreturn [{ json: { text } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "88ee5a45-55ee-42b7-a8f4-d8a004404e2c",
+      "name": "Build summary"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CKZG4862W",
+          "mode": "list",
+          "cachedResultName": "daily-summary"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        672,
+        0
+      ],
+      "id": "33af6c23-8355-4aa8-bd7c-4001834df216",
+      "name": "Post summary",
+      "webhookId": "2feb772c-5c43-404e-b675-3bbb78acc6cd",
+      "credentials": {
+        "slackApi": {
+          "id": "Je5ZeR6C817EF67V",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read inbox log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read inbox log": {
+      "main": [
+        [
+          {
+            "node": "Build summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build summary": {
+      "main": [
+        [
+          {
+            "node": "Post summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "62044679-172e-49fe-9bb3-db99e46eb558",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7759bc24a933c48933729d474cfeea2ac28fd4927a3fbca08adbded221bcf2f8"
+  },
+  "nodeGroups": [],
+  "id": "pSSJfXFXKUuxi8Nc",
+  "tags": []
+}
