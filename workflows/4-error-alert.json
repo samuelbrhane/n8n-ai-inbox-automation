@@ -1,0 +1,73 @@
+{
+  "name": "4. Error alert",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b1880f54-681b-41c9-8af7-adb6450883ba",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CKY4JVBFG",
+          "mode": "list",
+          "cachedResultName": "automation-alerts"
+        },
+        "text": "=:warning: *Workflow failed: {{ $json.workflow.name }}* *Node:* {{ $json.execution.lastNodeExecuted }} *Error:* {{ $json.execution.error.message }} *Time:* {{ $now.toFormat('yyyy-MM-dd HH:mm') }} *Details:* {{ $json.execution.url }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "0558cd60-bb64-46f5-be48-d47df91176b3",
+      "name": "Alert on error",
+      "webhookId": "522a00c4-0383-4f24-83c6-be4e4f782040",
+      "credentials": {
+        "slackApi": {
+          "id": "Je5ZeR6C817EF67V",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Alert on error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "81acdb1c-4865-40eb-909f-15dafb279d20",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7759bc24a933c48933729d474cfeea2ac28fd4927a3fbca08adbded221bcf2f8"
+  },
+  "nodeGroups": [],
+  "id": "tS6fOnDAMEFTfYsS",
+  "tags": []
+}
