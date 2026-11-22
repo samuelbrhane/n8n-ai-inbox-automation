@@ -1,0 +1,697 @@
+{
+  "name": "2. Inbox triage",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "readStatus": "unread"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7f0377d1-3179-42c3-98de-de8a0ad2b246",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UWy7uIMubhHoHr2X",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject: {{ $json.subject }}\nFrom: {{ $json.from.value[0].name }} <{{ $json.from.value[0].address }}>\n\n{{ $json.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You sort emails sent to Northvale Rentals, a company that manages rental flats.  Choose exactly one category: - question: a tenant asks for information (rent, payments, rules, parking, pets, contracts, moving) - repair: something in the flat or building is broken or not working - complaint: unhappy about a neighbour, noise, the service or a person - viewing: someone wants to see a flat or apply to rent one - spam: advertising, sales offers, newsletters or anything unrelated to renting  Urgency is \"emergency\" only for: water leaking or a burst pipe, no heating, a gas smell, no electricity in the whole flat, or a flat that cannot be locked. Everything else is \"normal\".  Write the summary in English, in one short sentence for the office team. Take the flat code (like VR12-3B) only if the email states it; otherwise leave it empty. Take the sender's name from the signature at the end of the email. Use the From line only if there is no signature."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        0
+      ],
+      "id": "874f2a50-8b23-40d4-826b-d57bd93761a2",
+      "name": "Sort email"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5.4-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        208
+      ],
+      "id": "2dacd43d-5f6e-4a91-bdc7-4c0acef05245",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "gCmihEbVmsdeKwAG",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"category\": {\n      \"type\": \"string\",\n      \"enum\": [\"question\", \"repair\", \"complaint\", \"viewing\", \"spam\"]\n    },\n    \"urgency\": {\n      \"type\": \"string\",\n      \"enum\": [\"emergency\", \"normal\"]\n    },\n    \"summary\": {\n      \"type\": \"string\",\n      \"description\": \"One short English sentence for the office team\"\n    },\n    \"tenant_name\": {\n      \"type\": \"string\"\n    },\n    \"flat_code\": {\n      \"type\": \"string\",\n      \"description\": \"Flat code like VR12-3B, empty if not stated\"\n    },\n    \"language\": {\n      \"type\": \"string\",\n      \"description\": \"Two-letter code of the email's language, like en or it\"\n    }\n  },\n  \"required\": [\"category\", \"urgency\", \"summary\", \"tenant_name\", \"flat_code\", \"language\"]\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        208
+      ],
+      "id": "9da20ff3-437f-4deb-ab06-833c2f624933",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "question",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "fdd37224-92db-4963-9d0b-3a53bda1b284"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "question"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "a3d14896-8262-4545-ba9c-421bf4e7920d",
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "repair",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "repair"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "8f22d221-87ec-4cb6-9ee8-0c40aaf5276f",
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "complaint",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "complaint"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "3fb87ca1-e21d-4d62-83bc-6bb397d21613",
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "viewing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "viewing"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "23f78c94-b0df-4201-ba82-36e0c58fdb5c",
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "spam",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "spam"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        592,
+        0
+      ],
+      "id": "4935ef6b-4b56-4867-b163-4a2a888a65fc",
+      "name": "Route by type"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject: {{ $('Gmail Trigger').item.json.subject }}\n\n{{ $('Gmail Trigger').item.json.text }}",
+        "options": {
+          "systemPromptTemplate": "You write email replies for Northvale Rentals, a company that manages rental flats.\n\nAnswer the tenant's email using ONLY the information in the context below. Do not invent prices, dates, phone numbers or rules.\n\nIf the context does not answer the question, reply with exactly: NO_ANSWER\n\nIf it does answer it:\n- Reply in the same language as the tenant's email.\n- Start with \"Dear\" and the tenant's first name if known.\n- Keep it short, friendly and clear: answer each question they asked.\n- End with: \"Best regards, Northvale Rentals\"\n\nContext:\n{context}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.7,
+      "position": [
+        816,
+        -352
+      ],
+      "id": "cdccb3b4-c4f5-4f76-8617-76a528630007",
+      "name": "Draft answer"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5.4-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        -160
+      ],
+      "id": "dcf41c7b-b710-48e2-bcbf-5b8fe76b0e89",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "gCmihEbVmsdeKwAG",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [
+        960,
+        -224
+      ],
+      "id": "66c9116f-02e6-4f5b-b0a1-02ba314cd36c",
+      "name": "Vector Store Retriever"
+    },
+    {
+      "parameters": {
+        "tableName": "northvale_docs",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.4,
+      "position": [
+        1136,
+        -112
+      ],
+      "id": "512e208b-c70b-4277-b763-f17f81ec0f5e",
+      "name": "Postgres PGVector Store",
+      "credentials": {
+        "postgres": {
+          "id": "0A45ICKswlhHWN0Q",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1296,
+        32
+      ],
+      "id": "16c7e1bd-1ef0-4fec-94ef-b70f3878f9eb",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "gCmihEbVmsdeKwAG",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "20079ab0-c54b-41b9-872e-af79e962b4d8",
+              "leftValue": "={{ $json.response.trim() }}",
+              "rightValue": "NO_ANSWER",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1184,
+        -352
+      ],
+      "id": "dedf4d2d-30c5-480d-a66e-fffdb4cb2a2b",
+      "name": "Has answer?"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5.4-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        416
+      ],
+      "id": "4450f317-6c3b-4acb-969a-d14671296ac6",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "gCmihEbVmsdeKwAG",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CL1J9ERCZ",
+          "mode": "list",
+          "cachedResultName": "inbox-approvals"
+        },
+        "text": "=:raising_hand: *Needs a person*: the documents don't answer this *From:* {{ $('Gmail Trigger').item.json.from.value[0].address }} *Subject:* {{ $('Gmail Trigger').item.json.subject }} *Summary:* {{ $('Sort email').item.json.output.summary }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1408,
+        -256
+      ],
+      "id": "c6407015-dcb4-486c-b860-7fd29403b6bf",
+      "name": "Needs a person",
+      "webhookId": "d4edf8fc-a496-4dc3-94d0-c8ef3e79ef70",
+      "credentials": {
+        "slackApi": {
+          "id": "Je5ZeR6C817EF67V",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CL1J9ERCZ",
+          "mode": "list",
+          "cachedResultName": "inbox-approvals"
+        },
+        "message": "=:envelope_with_arrow: *New reply to approve*\n*From:* {{ $('Gmail Trigger').item.json.from.value[0].address }}\n*Subject:* {{ $('Gmail Trigger').item.json.subject }}\n*Summary:* {{ $('Sort email').item.json.output.summary }}\n\n*Draft reply:*\n{{ $json.response }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Send reply",
+            "disapproveLabel": "Don't send"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1408,
+        -448
+      ],
+      "id": "214f0b3c-56a7-47dc-90b4-fe466f49cc89",
+      "name": "Ask for approval",
+      "webhookId": "22ffb777-3ef8-4507-a874-de7906c23fee",
+      "credentials": {
+        "slackApi": {
+          "id": "Je5ZeR6C817EF67V",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "50cf08ca-dcd7-4e4a-8146-544c8b5e27c2",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1632,
+        -448
+      ],
+      "id": "0d2a1b25-4cc1-428b-9975-7a89a0e2d0a9",
+      "name": "Approved?"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "message": "={{ $('Draft answer').item.json.response }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1856,
+        -544
+      ],
+      "id": "e564969e-f6dc-4de5-9942-169cfa57eb96",
+      "name": "Send reply",
+      "webhookId": "1a551f28-cfcf-4154-9a79-d5d893732dc7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UWy7uIMubhHoHr2X",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Sort email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sort email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Sort email",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort email": {
+      "main": [
+        [
+          {
+            "node": "Route by type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by type": {
+      "main": [
+        [
+          {
+            "node": "Draft answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Draft answer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Retriever": {
+      "ai_retriever": [
+        [
+          {
+            "node": "Draft answer",
+            "type": "ai_retriever",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Retriever",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft answer": {
+      "main": [
+        [
+          {
+            "node": "Has answer?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has answer?": {
+      "main": [
+        [
+          {
+            "node": "Ask for approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Needs a person",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask for approval": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Send reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f07c9162-235e-4f3e-92e8-32d9cff3a1f0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7759bc24a933c48933729d474cfeea2ac28fd4927a3fbca08adbded221bcf2f8"
+  },
+  "nodeGroups": [],
+  "id": "6OtrHWA2H2Hmw4p8",
+  "tags": []
+}
