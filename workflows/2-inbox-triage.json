@@ -661,6 +661,184 @@
     },
     {
       "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_4622251155210662280"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        928,
+        464
+      ],
+      "id": "f936f68f-3f5a-4383-b545-086e63cba6c5",
+      "name": "Label spam",
+      "webhookId": "90ad14ca-5f6f-4186-a05e-04b083daf798",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UWy7uIMubhHoHr2X",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1vexV2Wl91asThVsyek-df2ve9p90aaAMvZ_VZ4XvQXo",
+          "mode": "list",
+          "cachedResultName": "Northvale Inbox",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vexV2Wl91asThVsyek-df2ve9p90aaAMvZ_VZ4XvQXo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Inbox log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vexV2Wl91asThVsyek-df2ve9p90aaAMvZ_VZ4XvQXo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "received_at": "={{ DateTime.fromISO($('Gmail Trigger').item.json.date).setZone('Europe/Rome').toFormat('yyyy-MM-dd HH:mm') }}",
+            "message_id": "={{ $('Gmail Trigger').item.json.id }}",
+            "from": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+            "subject": "={{ $('Gmail Trigger').item.json.subject }}",
+            "category": "={{ $('Sort email').item.json.output.category }}",
+            "urgency": "={{ $('Sort email').item.json.output.urgency }}",
+            "summary": "={{ $('Sort email').item.json.output.summary }}",
+            "draft_reply": "={{ $('Draft answer').isExecuted ? $('Draft answer').item.json.response : '' }}",
+            "handled_at": "={{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+            "status": "={{ (() => {   const c = $('Sort email').item.json.output.category;   if (c === 'spam') return 'labelled';   if (c === 'repair' || c === 'viewing') return 'auto_replied';   if (c === 'complaint') return 'escalated';   if ($('Send reply').isExecuted) return 'sent';   if ($('Needs a person').isExecuted) return 'escalated';   return 'rejected'; })() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "from",
+              "displayName": "from",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "draft_reply",
+              "displayName": "draft_reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "handled_at",
+              "displayName": "handled_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3136,
+        -368
+      ],
+      "id": "3c6943df-df42-478e-b032-07783c2749b3",
+      "name": "Log to sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "B8nAPYHPbHNeuN1w",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
         "operation": "reply",
         "messageId": "={{ $('Gmail Trigger').item.json.id }}",
         "emailType": "text",
@@ -677,32 +855,8 @@
         240
       ],
       "id": "f2797edf-9ce2-4043-8c58-66571e03a5b4",
-      "name": "Reply to a message",
+      "name": "Reply with slots",
       "webhookId": "575a8641-984f-4007-aaf4-3c097c2d51c5",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "UWy7uIMubhHoHr2X",
-          "name": "Gmail account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "addLabels",
-        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
-        "labelIds": [
-          "Label_4622251155210662280"
-        ]
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        928,
-        464
-      ],
-      "id": "f936f68f-3f5a-4383-b545-086e63cba6c5",
-      "name": "Label spam",
-      "webhookId": "90ad14ca-5f6f-4186-a05e-04b083daf798",
       "credentials": {
         "gmailOAuth2": {
           "id": "UWy7uIMubhHoHr2X",
@@ -899,6 +1053,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Log to sheet",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -928,7 +1089,73 @@
       "main": [
         [
           {
-            "node": "Reply to a message",
+            "node": "Reply with slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label spam": {
+      "main": [
+        [
+          {
+            "node": "Log to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send reply": {
+      "main": [
+        [
+          {
+            "node": "Log to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person": {
+      "main": [
+        [
+          {
+            "node": "Log to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert maintenance": {
+      "main": [
+        [
+          {
+            "node": "Log to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complaint to staff": {
+      "main": [
+        [
+          {
+            "node": "Log to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply with slots": {
+      "main": [
+        [
+          {
+            "node": "Log to sheet",
             "type": "main",
             "index": 0
           }
@@ -941,7 +1168,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "92976e5b-07b0-4097-bfd3-8a70fa84990f",
+  "versionId": "c7c4ccb1-7c38-422a-b136-fe195e41189e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "7759bc24a933c48933729d474cfeea2ac28fd4927a3fbca08adbded221bcf2f8"
