@@ -1,0 +1,21 @@
+id,subject,body,expected_category,expected_urgency
+1,Rent due date,"Hi, on which day of the month do I need to pay rent? Thanks, Anna Conti",question,normal
+2,Late payment,"Hello, my salary comes on the 8th this month. What happens if I pay rent then? Marco Esposito, VR12-1A",question,normal
+3,Can I park my motorbike?,"Is there a parking space for a motorbike in my building and how much does it cost? Elena Ricci",question,normal
+4,Guest staying,"My brother wants to stay with me for three weeks. Is that ok? Davide Moretti, CG8-2A",question,normal
+5,Antenna,"Can I install a satellite dish on my balcony? Sara Gallo, VR12-3A",question,normal
+6,Domanda sull'affitto,"Buongiorno, posso pagare l'affitto con bonifico automatico ogni mese? Grazie, Francesca Lombardi",question,normal
+7,Water everywhere,"A pipe burst under the kitchen sink and water is all over the floor! Please help now. Luca Bruno, CG8-1A",repair,emergency
+8,No heating,"Our heating stopped working last night and it is very cold in the flat. We have a baby. Chiara Marino, VR12-2B",repair,emergency
+9,Smell of gas,"There is a strong gas smell in the stairwell near our door. Matteo Greco, VR12-1B",repair,emergency
+10,Dripping tap,"The bathroom tap has been dripping for a week. Not urgent, but please fix it when possible. Paola Costa, CG8-2B",repair,normal
+11,Oven broken,"The oven you supplied doesn't heat up anymore. Simone Rizzo, VR12-3B",repair,normal
+12,Neighbour smoking,"My neighbour smokes in the stairwell every evening and the smoke comes into my flat. Laura Ferrara",complaint,normal
+13,Rude technician,"The technician who came yesterday was rude and left a mess. I am not happy with the service. Andrea Santoro, CG8-1B",complaint,normal
+14,Bins overflowing,"The courtyard bins have been overflowing for days and people leave furniture next to them. Giorgio Fontana",complaint,normal
+15,Flat available?,"Hello, is the flat on Corso Garibaldi still available? I would like to see it. Valentina De Luca",viewing,normal
+16,Visit request,"I'm moving to the city in January. Could I book a viewing of one of your flats? Federico Mancini",viewing,normal
+17,Vorrei vedere l'appartamento,"Buongiorno, vorrei visitare l'appartamento in Via Roma. Quando è possibile? Alessia Caruso",viewing,normal
+18,Cheap loans,"Get a personal loan today with 0% interest! Approval in 5 minutes. Click here.",spam,normal
+19,Your website,"We noticed your website loads slowly. Our team can redesign it for only 499 euro.",spam,normal
+20,Weekly newsletter,"Top 10 interior design trends this winter. Unsubscribe at any time.",spam,normal
